@@ -1,0 +1,3 @@
+/usr/sbin/dropbear
+/sbin/cryptsetup
+/etc/dropbear/*

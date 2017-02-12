@@ -22,7 +22,7 @@ cp initramfs-init-dropbear /usr/share/mkinitfs/initramfs-init-dropbear
 cp unlock_disk /etc/dropbear/
 ```
 
-Add dropbear to `/etc/mkinitfs/mkinitfs.conf`
+Add `dropbear` to `/etc/mkinitfs/mkinitfs.conf` and remove `cryptsetup`
 
 Copy a ssh-public-key to `/etc/dropbear/authorized_keys`
 Copy `dropbear_*_host_keys` to `/etc/dropbear` if needed, dropbear will generate

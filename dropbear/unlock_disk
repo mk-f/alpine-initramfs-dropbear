@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -- $(cat /proc/cmdline)
+
+for opt; do
+	case "$opt" in
+		cryptroot=*)
+			KOPT_cryptroot=${opt#cryptroot=}
+			continue
+			;;
+		cryptdm=*)
+			KOPT_cryptdm=${opt#cryptdm=}
+			continue
+			;;
+	esac
+done
+
+while [ ! -b /dev/mapper/${KOPT_cryptdm} ]; do
+	/sbin/cryptsetup luksOpen $KOPT_cryptroot $KOPT_cryptdm
+	sleep 2
+done
+
+killall -9 dropbear
