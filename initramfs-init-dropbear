@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # this is the init script version
-VERSION=3.0.9-r1
+VERSION=3.1.0-r3
 SINGLEMODE=no
 sysroot=/sysroot
 splashfile=/.splash.ctrl
@@ -113,9 +113,11 @@ setup_inittab_console(){
 		local term=
 		case "$tty" in
 			ttyS*|ttyMFD*|ttyUSB*|ttyAMA*)
-				[ "$speed" = "$1" ] && speed=115200
 				term=vt100
 				line=-L
+				flow=${speed##*[^r]}
+				speed=${speed%%[^0-9]*}
+				speed=${speed:-115200}
 				;;
 			*)
 				[ "$speed" = "$1" ] && speed=38400
@@ -130,7 +132,7 @@ setup_inittab_console(){
 		if ! grep -q "^$tty:" $sysroot/etc/inittab; then
 			echo "# enable login on alternative console" \
 				>> $sysroot/etc/inittab
-			echo "$tty::respawn:/sbin/getty $line $speed $tty $term" \
+			echo "$tty::respawn:/sbin/getty ${flow:+-h }$line $speed $tty $term" \
 				>> $sysroot/etc/inittab
 		fi
 		if [ -e "$sysroot"/etc/securetty ] && ! grep -q -w "$tty" "$sysroot"/etc/securetty; then
@@ -277,8 +279,8 @@ setup_dropbear() {
 #  acpi_osi="!Windows 2006" xen-pciback.hide=(01:00.0)
 set -- $(cat /proc/cmdline)
 
-myopts="alpine_dev autodetect autoraid chart cryptroot cryptdm debug dropbear init
-	dma init_args keep_apk_new modules ovl_dev pkgs quiet root_size root
+myopts="alpine_dev autodetect autoraid chart cryptroot cryptdm cryptheader cryptoffset
+	debug_init dma dropbear init_args keep_apk_new modules ovl_dev pkgs quiet root_size root
 	usbdelay ip alpine_repo apkovl alpine_start splash blacklist
 	overlaytmpfs rootfstype rootflags nbd resume"
 
@@ -363,7 +365,7 @@ modprobe -a $(echo "$KOPT_modules $KOPT_rootfstype" | tr ',' ' ' ) loop squashfs
 if [ -f /etc/modules ] ; then
 	sed 's/\#.*//g' < /etc/modules |
 	while read module args; do
-		modprobe $module $args
+		modprobe -q $module $args
 	done
 fi
 eend 0
@@ -375,6 +377,12 @@ elif [ -n "$KOPT_cryptroot" ]; then
 	cryptopts="-c ${KOPT_cryptroot}"
 	if [ -n "$KOPT_cryptdm" ]; then
 		cryptopts="$cryptopts -m ${KOPT_cryptdm}"
+	fi
+	if [ -n "$KOPT_cryptheader" ]; then
+		cryptopts="$cryptopts -H ${KOPT_cryptheader}"
+	fi
+	if [ -n "$KOPT_cryptoffset" ]; then
+		cryptopts="$cryptopts -o ${KOPT_cryptoffset}"
 	fi
 fi
 
@@ -396,6 +404,10 @@ if [ -n "$KOPT_root" ]; then
 	ebegin "Mounting root"
 	nlplug-findfs $cryptopts -p /sbin/mdev ${KOPT_debug_init:+-d} \
 		$KOPT_root
+
+	if echo "$KOPT_modules $KOPT_rootfstype" | grep -qw btrfs; then
+		/sbin/btrfs device scan || echo "Failed to scan devices for btrfs filesystem."
+	fi
 
 	if [ -n "$KOPT_resume" ]; then
 		echo "Resume from disk"
