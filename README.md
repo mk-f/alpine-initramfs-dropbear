@@ -5,7 +5,7 @@ unlock cryptdisk remotely
 
 Build Alpine Linux initramfs with dropbear to unlock an encrypted root-disk remotely via ssh.
 The `initramfs-init-dropbear`-init-script is a slightly modified version of
-the default-init which comes with Alpine Linux 3.5
+the default-init which comes with Alpine Linux 3.6
 
 ## Requirements
 Requires dropbear and cryptsetup. Assumes you already have a working cryptsetup setup, i.e. are able
