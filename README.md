@@ -35,10 +35,12 @@ missing keys on its own. See `man dropbear` and `man dropbearkey`.
 dropbear=<port> cryptdm=<cryptdm> cryptroot=<crypt-dev> ip=<ip>::<gw>:<mask>::<interface>
 ```
 
-e.g for extlinux:
-
+e.g for extlinux you should modify ``/etc/update-extlinux.conf``:
 ```
-APPEND root=/dev/sda2 modules=sd-mod,ext4,ata_piix,e1000 dropbear=5555 cryptdm=crypt cryptroot=/dev/sda2 ip=1.2.3.4::1.2.3.1:255.255.255.0::eth0
+modules=sd-mod,usb-storage,ext4,ata_piix,e1000
+```
+```
+default_kernel_opts="quiet rootfstype=ext4 dropbear=5555 cryptroot=/dev/sda2 cryptdm=crypt ip=1.2.3.4::1.2.3.1:255.255.255.0::eth0"
 ```
 
 It is crucial, that all modules needed for disk-decryption and networking are listed in the
@@ -46,7 +48,7 @@ It is crucial, that all modules needed for disk-decryption and networking are li
 
 - update bootloader, e.g for extlinux:
 ```
-extlinux --install /boot --update
+update-extlinux
 ```
 - build initramfs:
 ```
