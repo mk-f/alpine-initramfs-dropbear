@@ -372,7 +372,11 @@ eend 0
 
 if [ -n "$KOPT_dropbear" ]; then
 	configure_ip
-	setup_dropbear || echo "Failed to uncrypt root via ssh"
+	if [ -n "$KOPT_cryptroot" ]; then
+	  # wait for blk device to appear
+	  nlplug-findfs -p /sbin/mdev ${KOPT_debug_init:+-d} ${KOPT_cryptroot}
+	  setup_dropbear || echo "Failed to uncrypt root via ssh"
+	fi
 elif [ -n "$KOPT_cryptroot" ]; then
 	cryptopts="-c ${KOPT_cryptroot}"
 	if [ -n "$KOPT_cryptdm" ]; then
