@@ -12,11 +12,15 @@ for opt; do
 			KOPT_cryptdm=${opt#cryptdm=}
 			continue
 			;;
+		root=*)
+			KOPT_root=${opt#root=}
+			continue
+			;;
 	esac
 done
 
 while [ ! -b /dev/mapper/${KOPT_cryptdm} ]; do
-	/sbin/cryptsetup luksOpen $KOPT_cryptroot $KOPT_cryptdm
+	/sbin/nlplug-findfs -c ${KOPT_cryptroot} -m ${KOPT_cryptdm} ${KOPT_debug_init:+-d} -p /sbin/mdev ${KOPT_root}
 	sleep 2
 done
 
