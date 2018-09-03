@@ -270,7 +270,7 @@ setup_dropbear() {
 	mkdir /root/.ssh
 	mv /etc/dropbear/authorized_keys /root/.ssh
 
-	dropbear -R -F -E -m -s -j -k -p $port
+	dropbear -R -F -E -s -j -k -p $port
 
 	[ -b /dev/mapper/${KOPT_cryptdm} ] || return 1
 }
