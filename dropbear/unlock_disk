@@ -24,4 +24,4 @@ while [ ! -b /dev/mapper/${KOPT_cryptdm} ]; do
 	sleep 2
 done
 
-killall -9 dropbear
+killall dropbear
